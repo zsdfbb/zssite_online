@@ -54,7 +54,7 @@ theme = "PaperMod"
   ShowWordCount = true
   ShowRssButtonInSectionTermList = true
   ShowCanonicalLink = true
-  ShareButtons = ["x", "linkedin", "weibo"]
+  ShareButtons = ["linkedin", "weibo"]
   comments = true
   mainSections = ["posts"]
 
