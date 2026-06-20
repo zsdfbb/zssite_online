@@ -1,0 +1,118 @@
+baseURL = "https://zssite.online/"
+languageCode = "zh-cn"
+defaultContentLanguage = "zh-cn"
+title = "zssite"
+theme = "PaperMod"
+
+# 主导航
+[[menu.main]]
+  identifier = "about"
+  name = "About"
+  url = "/about/"
+  weight = 10
+
+[[menu.main]]
+  identifier = "archives"
+  name = "Archives"
+  url = "/archives/"
+  weight = 20
+
+[[menu.main]]
+  identifier = "search"
+  name = "Search"
+  url = "/search/"
+  weight = 30
+
+[pagination]
+  pagerSize = 10
+
+[outputs]
+  home = ["HTML", "RSS"]
+  page = ["HTML"]
+  section = ["HTML", "RSS"]
+  taxonomy = ["HTML", "RSS"]
+
+[markup]
+  [markup.highlight]
+    noClasses = false
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+
+[params]
+  env = "production"
+  description = "zssite — 个人博客"
+  author = "zsdfbb"
+  keywords = ["blog", "zssite"]
+  DateFormat = "2006-01-02"
+  defaultTheme = "auto"
+  ShowReadingTime = true
+  ShowShareButtons = true
+  ShowPostNavLinks = true
+  ShowBreadCrumbs = true
+  ShowCodeCopyButtons = true
+  ShowWordCount = true
+  ShowRssButtonInSectionTermList = true
+  ShowCanonicalLink = true
+  ShareButtons = ["x", "linkedin", "weibo"]
+  comments = true
+  mainSections = ["posts"]
+
+# Profile 模式
+[params.profileMode]
+  enabled = true
+  title = "Hi, I’m zsdfbb 👋"
+  subtitle = "记录学习与折腾的过程"
+  imageUrl = "/images/profile.png"
+  imageWidth = 120
+  imageHeight = 120
+  [[params.profileMode.buttons]]
+    name = "Posts"
+    url = "/posts/"
+  [[params.profileMode.buttons]]
+    name = "About"
+    url = "/about/"
+  [[params.profileMode.buttons]]
+    name = "GitHub"
+    url = "https://github.com/zsdfbb"
+  [[params.profileMode.buttons]]
+    name = "RSS"
+    url = "/index.xml"
+
+# 首页信息卡
+[params.homeInfoParams]
+  Title = "欢迎来到 zssite.online"
+  Content = """一个由 Hugo + PaperMod 搭建的极简博客。"""
+
+# Giscus 评论
+[params.giscus]
+  enable = true
+  repo = "zsdfbb/zssite_online"
+  repoId = "R_kgDOS-gO9Q"
+  category = "Announcements"
+  categoryId = "DIC_kwDOS-gO9c4C_iZq"
+  mapping = "pathname"
+  strict = "0"
+  reactionsEnabled = "1"
+  emitMetadata = "0"
+  inputPosition = "top"
+  theme = "preferred_color_scheme"
+  lang = "zh-CN"
+  lazyLoading = true
+
+# 搜索
+[params.fuseOpts]
+  isCaseSensitive = false
+  shouldSort = true
+  location = 0
+  distance = 1000
+  threshold = 0.4
+  minMatchCharLength = 0
+  limit = 10
+  keys = ["title", "permalink", "summary", "content"]
+
+# 社交图标
+[[params.socialIcons]]
+  name = "github"
+  title = "GitHub"
+  url = "https://github.com/zsdfbb"

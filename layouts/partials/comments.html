@@ -1,0 +1,37 @@
+{{- /*
+  Giscus comments partial
+  自定义实现，因为 PaperMod v8.0 不内置 Giscus
+  数据来源: hugo.toml 的 [params.giscus] 块
+*/ -}}
+{{- if not (eq .Site.Params.giscus.enable false) -}}
+  {{- $repo := .Site.Params.giscus.repo | default "" -}}
+  {{- $repoID := .Site.Params.giscus.repoId | default "" -}}
+  {{- $category := .Site.Params.giscus.category | default "" -}}
+  {{- $categoryID := .Site.Params.giscus.categoryId | default "" -}}
+  {{- $mapping := .Site.Params.giscus.mapping | default "pathname" -}}
+  {{- $strict := .Site.Params.giscus.strict | default "0" -}}
+  {{- $reactionsEnabled := .Site.Params.giscus.reactionsEnabled | default "1" -}}
+  {{- $emitMetadata := .Site.Params.giscus.emitMetadata | default "0" -}}
+  {{- $inputPosition := .Site.Params.giscus.inputPosition | default "bottom" -}}
+  {{- $theme := .Site.Params.giscus.theme | default "preferred_color_scheme" -}}
+  {{- $lang := .Site.Params.giscus.lang | default "zh-CN" -}}
+  {{- $lazyLoading := .Site.Params.giscus.lazyLoading | default true -}}
+  {{- if $repo -}}
+  <script src="https://giscus.app/client.js"
+          data-repo="{{ $repo }}"
+          data-repo-id="{{ $repoID }}"
+          data-category="{{ $category }}"
+          data-category-id="{{ $categoryID }}"
+          data-mapping="{{ $mapping }}"
+          data-strict="{{ $strict }}"
+          data-reactions-enabled="{{ $reactionsEnabled }}"
+          data-emit-metadata="{{ $emitMetadata }}"
+          data-input-position="{{ $inputPosition }}"
+          data-theme="{{ $theme }}"
+          data-lang="{{ $lang }}"
+          {{ if $lazyLoading }}data-loading="lazy"{{ end }}
+          crossorigin="anonymous"
+          async>
+  </script>
+  {{- end -}}
+{{- end -}}
