@@ -7,7 +7,7 @@ comments: false
 
 ## 关于我
 
-欢迎来到 zssite.online，这是用 Hugo + PaperMod 搭建的个人博客。
+欢迎来到风来的个人网站。
 
 主要记录学习与折腾的过程，包括但不限于：
 
@@ -18,3 +18,6 @@ comments: false
 联系方式：
 
 - GitHub: [@zsdfbb](https://github.com/zsdfbb)
+- 公众号：风来的躺平日志
+
+![公众号二维码](/images/wechat-qr.jpg)
