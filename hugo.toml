@@ -1,7 +1,7 @@
 baseURL = "https://zssite.online/"
 languageCode = "zh-cn"
 defaultContentLanguage = "zh-cn"
-title = "zssite"
+title = "Fenglai"
 theme = "PaperMod"
 
 # 主导航
