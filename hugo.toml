@@ -7,19 +7,19 @@ theme = "PaperMod"
 # 主导航
 [[menu.main]]
   identifier = "about"
-  name = "About"
+  name = "关于"
   url = "/about/"
   weight = 10
 
 [[menu.main]]
   identifier = "archives"
-  name = "Archives"
+  name = "归档"
   url = "/archives/"
   weight = 20
 
 [[menu.main]]
   identifier = "search"
-  name = "Search"
+  name = "搜索"
   url = "/search/"
   weight = 30
 
@@ -41,8 +41,8 @@ theme = "PaperMod"
 
 [params]
   env = "production"
-  description = "zssite — 个人博客"
-  author = "zsdfbb"
+  description = "风来的个人博客 — 记录学习与研究"
+  author = "风来"
   keywords = ["blog", "zssite"]
   DateFormat = "2006-01-02"
   defaultTheme = "auto"
@@ -60,16 +60,16 @@ theme = "PaperMod"
 # Profile 模式
 [params.profileMode]
   enabled = true
-  title = "Hi, I’m zsdfbb 👋"
-  subtitle = "记录学习与折腾的过程"
-  imageUrl = "/images/profile.png"
+  title = "我是风来 👋"
+  subtitle = "记录学习、研究、折腾、躺平的日志"
+  imageUrl = "/images/profile.jpg"
   imageWidth = 120
   imageHeight = 120
   [[params.profileMode.buttons]]
-    name = "Posts"
+    name = "文章"
     url = "/posts/"
   [[params.profileMode.buttons]]
-    name = "About"
+    name = "关于"
     url = "/about/"
   [[params.profileMode.buttons]]
     name = "GitHub"
@@ -81,7 +81,7 @@ theme = "PaperMod"
 # 首页信息卡
 [params.homeInfoParams]
   Title = "欢迎来到 zssite.online"
-  Content = """一个由 Hugo + PaperMod 搭建的极简博客。"""
+  Content = """记录学习、研究、折腾、躺平的日志。"""
 
 # Giscus 评论
 [params.giscus]

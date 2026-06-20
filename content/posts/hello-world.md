@@ -1,5 +1,5 @@
 ---
-title: "Hello World"
+title: "你好，世界"
 date: 2026-06-20T20:00:00+08:00
 draft: false
 tags: ["meta", "hugo"]
