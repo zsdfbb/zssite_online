@@ -5,28 +5,37 @@
 #   bash scripts/sync_smartbeta_blog.sh
 #
 # 行为:
-#   1. 源文件不存在          → exit 0, stdout 提示
-#   2. 源文件 date ≤ 当前文章  → exit 0, 幂等跳过
+#   1. 先跑 FenglaiIndex daily_report.py 生成最新源数据
+#   2. 源文件不存在          → exit 0, stdout 提示
 #   3. 解析失败              → exit 1, mailcode 触发错误邮件
-#   4. 拼装新文章 + commit + push
-#   5. 内容无变化            → exit 0, 不 commit
-#   6. push 失败             → exit 1, mailcode 触发错误邮件
+#   4. 源文件 date ≤ 当前文章  → exit 0, 幂等跳过
+#   5. 拼装新文章 + commit + push
+#   6. 内容无变化            → exit 0, 不 commit
+#   7. push 失败             → exit 1, mailcode 触发错误邮件
 #
 # 被 mailcode 调度器在 daily 09:30 触发, 也会被人工 `bash` 调用调试。
 
 set -euo pipefail
 
-SRC="/home/zs/Develop/FenglaiIndex/SMARTBETA_SIGNALS.md"
+FENGLAI="/home/zs/Develop/zssite_online/FenglaiIndex"
+SRC="$FENGLAI/SMARTBETA_SIGNALS.md"
 DST="/home/zs/Develop/zssite_online/content/posts/指数信号-1-smartbeta日报.md"
 ZSSITE="/home/zs/Develop/zssite_online"
 
-# ---- 1. 源文件存在性 ----
+# ---- 1. 先运行 daily_report 生成最新源文件（忽略 git push 失败） ----
+echo "[step 1/3] running daily_report.py..."
+cd "$FENGLAI"
+.venv/bin/python3 -m src.smartbeta.daily_report 2>&1 || true
+cd "$ZSSITE"
+echo ""
+
+# ---- 2. 源文件存在性 ----
 if [ ! -f "$SRC" ]; then
   echo "skip: source missing ($SRC)"
   exit 0
 fi
 
-# ---- 2. 让 python 解析源文件, 把 front matter 元信息写到 META_FILE, 正文写到 BODY_FILE ----
+# ---- 3. 让 python 解析源文件, 把 front matter 元信息写到 META_FILE, 正文写到 BODY_FILE ----
 META_FILE=$(mktemp)
 BODY_FILE=$(mktemp)
 trap 'rm -f "$META_FILE" "$BODY_FILE"' EXIT
@@ -72,7 +81,7 @@ PY
 read -r NEW_DATE NEW_TIME FRONT_DATE < "$META_FILE"
 BODY=$(cat "$BODY_FILE")
 
-# ---- 3. 与当前文章 date 对比, 幂等 ----
+# ---- 4. 与当前文章 date 对比, 幂等 ----
 if [ -f "$DST" ]; then
   CUR_DATE=$(grep -E '^date:' "$DST" | head -1 | awk '{print $2}' | tr -d '"' | tr -d "'")
   if [ "$FRONT_DATE" = "$CUR_DATE" ]; then
@@ -81,7 +90,7 @@ if [ -f "$DST" ]; then
   fi
 fi
 
-# ---- 4. 拼装新文章 ----
+# ---- 5. 拼装新文章 ----
 TMP=$(mktemp)
 trap 'rm -f "$TMP" "$META_FILE" "$BODY_FILE"' EXIT
 
@@ -111,7 +120,7 @@ cover:
 ${BODY}
 EOF
 
-# ---- 5. 写入 + 提交 + 推送 ----
+# ---- 6. 写入 + 提交 + 推送 ----
 cp "$TMP" "$DST"
 
 cd "$ZSSITE"
