@@ -112,7 +112,7 @@ cover:
 
 ## 概述
 
-本目录按 [CubeSandbox 安全机制清单]({{< relref "../CubeSandbox安全机制清单.md" >}}) §1-§5 的子节展开,共 35 篇机制专题 + 1 篇本 README,提供:
+本目录按 [CubeSandbox 安全机制清单]({{< relref "CubeSandbox安全机制清单.md" >}}) §1-§5 的子节展开,共 35 篇机制专题 + 1 篇本 README,提供:
 
 - 每个机制的**完整文件位置证据** (`path/to/file:line`)
 - 配置/启用方式 (默认 / CLI flag / env / annotation)

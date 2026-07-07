@@ -26,15 +26,15 @@ cover:
 
 > 本清单按"机制主题"组织(虚拟化/内核/运行时/API/部署),便于查"机制 X 是什么"。与之**正交**的另一个视角是按"安全边界"组织,便于查"边界 Y 上有哪些机制"——后者已抽到独立系列,本节为索引入口。
 >
-> 系列定位、与 SVG 的对应关系、阅读路径详见 [`security-boundaries/README.md`]({{< relref "security-boundaries/README.md" >}})。
+> 系列定位、与 SVG 的对应关系、阅读路径详见 [`security-boundaries/README.md`]({{< relref "README.md" >}})。
 
 | 真边界 | 名称 | 一句话 | 文档 |
 |--------|------|--------|------|
-| **T1** | CubeAPI ingress | 外部 → CubeAPI 访问入口(认证 / 速率限制) | [T1-cubeapi-ingress.md]({{< relref "security-boundaries/T1-cubeapi-ingress.md" >}}) |
-| **T2** | Operator Trust | 运维 → 配置 / 镜像 / 二进制 / host-mount 路径 | [T2-operator-trust.md]({{< relref "security-boundaries/T2-operator-trust.md" >}}) |
-| **T3** | KVM CORE BOUNDARY ★ | Host ↔ Guest (独立 kernel + 3 层 seccomp + virtio) | [T3-kvm-core-boundary.md]({{< relref "security-boundaries/T3-kvm-core-boundary.md" >}}) |
-| **T4** | Egress | Guest → 互联网 (eBPF + TPROXY + L7 MITM) | [T4-egress.md]({{< relref "security-boundaries/T4-egress.md" >}}) |
-| **T5** | CubeProxy inbound | 互联网 → Sandbox (`*.cube.app` + token + 暴露端口) | [T5-cubeproxy-inbound.md]({{< relref "security-boundaries/T5-cubeproxy-inbound.md" >}}) |
+| **T1** | CubeAPI ingress | 外部 → CubeAPI 访问入口(认证 / 速率限制) | [T1-cubeapi-ingress.md]({{< relref "T1-cubeapi-ingress.md" >}}) |
+| **T2** | Operator Trust | 运维 → 配置 / 镜像 / 二进制 / host-mount 路径 | [T2-operator-trust.md]({{< relref "T2-operator-trust.md" >}}) |
+| **T3** | KVM CORE BOUNDARY ★ | Host ↔ Guest (独立 kernel + 3 层 seccomp + virtio) | [T3-kvm-core-boundary.md]({{< relref "T3-kvm-core-boundary.md" >}}) |
+| **T4** | Egress | Guest → 互联网 (eBPF + TPROXY + L7 MITM) | [T4-egress.md]({{< relref "T4-egress.md" >}}) |
+| **T5** | CubeProxy inbound | 互联网 → Sandbox (`*.cube.app` + token + 暴露端口) | [T5-cubeproxy-inbound.md]({{< relref "T5-cubeproxy-inbound.md" >}}) |
 
 > 系列文档反映 **2026/07 修订** 后的安全边界模型,与下方 SVG 一一对应;每篇按"L1-L7 中哪些参与 + 每个机制的文件位置 / 作用 / 配置"统一模板展开。本清单的机制章节 (§1-§5) 仍是机制定义的权威来源,系列文档是边界视角的入口索引。
 
