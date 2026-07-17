@@ -17,7 +17,7 @@
 
 set -euo pipefail
 
-FENGLAI="/home/zs/Develop/zssite_online/FenglaiIndex"
+FENGLAI="${HOME}/Develop/FenglaiIndex"
 SRC="$FENGLAI/SMARTBETA_SIGNALS.md"
 DST="/home/zs/Develop/zssite_online/content/posts/指数信号-1-smartbeta日报.md"
 ZSSITE="/home/zs/Develop/zssite_online"
