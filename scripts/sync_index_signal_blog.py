@@ -33,7 +33,7 @@
       不终止，用库里现有数据出报告，并在文首挂数据陈旧的警告。
     - 输出与前端只依赖标准库，不装 pandas，也不需要 FenglaiData 的 .venv。
     - 数据没换（周末、节假日、库里还没更新）时正文逐字相同，脚本直接跳过，不会产生空提交。
-    - 红利低波用中证官方价格指数 H30269.CSI（FenglaiData 没有收全收益序列 H20269）。
+    - 红利低波用中证红利低波动全收益指数 H20269.CSI（含分红再投资，策略 9 原文口径）。
 """
 
 from __future__ import annotations
@@ -62,8 +62,8 @@ UPDATE_TIMEOUT = 900
 
 # 沪深300：交易所指数，在 index_daily 表
 HS300 = "000300.SH"
-# 红利低波：中证官方价格指数，在 csindex_daily 表
-RED_MAIN = "H30269.CSI"
+# 红利低波：中证红利低波动全收益指数（含分红再投资），策略 9 原文用的就是这条
+RED_MAIN = "H20269.CSI"
 
 # 策略参数（与投资策略 9 一一对应，改这里就等于改规则）
 HS_EMA_SPAN = 200          # 沪深300 趋势均线
@@ -86,7 +86,8 @@ STAT_START = "2016-01-01"
 SQL = """
 SELECT code, CAST(trade_date AS VARCHAR) AS d, close FROM index_daily WHERE code = '000300.SH'
 UNION ALL
-SELECT code, CAST(trade_date AS VARCHAR), close FROM csindex_daily WHERE code = 'H30269.CSI'
+SELECT code, CAST(trade_date AS VARCHAR), close FROM csindex_daily
+ WHERE code = 'H20269.CSI'
 ORDER BY code, d
 """
 
@@ -94,8 +95,8 @@ ORDER BY code, d
 def update_data() -> None:
     """先跑 FenglaiData 的每日增量，把最新交易日数据拉进库再取数。
 
-    只更新信号用得到的两个行情表（index_daily 覆盖沪深300，csindex_daily 覆盖红利低波），
-    不为这两条均线去拉全市场 5000 多只股票。
+    只更新信号用得到的两个行情表（index_daily 覆盖沪深300，csindex_daily 覆盖红利低波
+    全收益 H20269），不为这两条均线去拉全市场 5000 多只股票。
 
     失败不终止：SDK 登不上、限流、断网时继续跑，用库里已有的数据出报告，
     文章顶部会因数据过旧而挂上警告。
@@ -137,8 +138,14 @@ def fetch_closes() -> dict[str, list[tuple[str, float]]]:
         if not close:
             continue
         out.setdefault(row["code"], []).append((row["d"], float(close)))
-    if HS300 not in out or RED_MAIN not in out:
-        raise SystemExit("取数结果缺少沪深300 或 H30269，检查库是否建好")
+    if HS300 not in out:
+        raise SystemExit("取数结果缺少沪深300（000300.SH），检查库是否建好")
+    if RED_MAIN not in out:
+        raise SystemExit(
+            f"取数结果里没有 {RED_MAIN}（中证红利低波动全收益）。\n"
+            "确认 FenglaiData 的 config/config.toml 的 [csi_index] 含 H20269，"
+            "并跑过 ./fenglai update --datasets csindex_daily"
+        )
     for rows in out.values():
         rows.sort()
     return out
@@ -384,14 +391,14 @@ def build_body(closes: dict[str, list[tuple[str, float]]], now: datetime) -> str
         f"| 沪深300 信号 | {HS300} | index_daily | {closes[HS300][0][0]} | 交易所价格指数，不复权 |"
     )
     lines.append(
-        f"| 红利低波信号 | {RED_MAIN} | csindex_daily | {closes[RED_MAIN][0][0]} | 中证官方价格指数，不含分红再投资 |"
+        f"| 红利低波信号 | {RED_MAIN} | csindex_daily | {closes[RED_MAIN][0][0]} | "
+        "中证红利低波动全收益指数，含分红再投资 |"
     )
     lines.append("")
     lines.append(
-        "**为什么用价格指数 H30269**：FenglaiData 目前只收了价格指数，没有收全收益序列 H20269。"
-        "策略 9 原文的偏离比是拿全收益算的（2026-11-11 那天 H20269 是 1.0365、H30269 是 1.0162），"
-        "两者差约 0.02，但规则看的是「价格跟自己均线的相对位置」，只要序列自身一贯，档位判定不受影响。"
-        "**不要拿 ETF 实盘价去跟策略 9 的数字直接比**——ETF 价格不复权，分红除权后会被系统性压低。"
+        f"**红利低波用全收益口径 {RED_MAIN}**：把分红再投资算进去，跟策略 9 原文一致。"
+        "分红除权会把价格抹掉一截，用不复权的价格序列算偏离比会系统性偏低，所以这里不能用任何"
+        "价格序列或 ETF 实盘价代替。"
     )
     lines.append("")
     lines.append("## 六、规则速查")
