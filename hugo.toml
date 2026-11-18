@@ -4,6 +4,10 @@ defaultContentLanguage = "zh-cn"
 title = "Fenglai"
 theme = "PaperMod"
 
+# 用 git 提交时间作为 lastmod（自动维护，不用在 frontmatter 里手写）
+# 注意：CI 必须完整 clone（actions/checkout 的 fetch-depth: 0），否则拿不到历史
+enableGitInfo = true
+
 # 主导航
 [[menu.main]]
   identifier = "about"
@@ -41,6 +45,8 @@ theme = "PaperMod"
 
 [params]
   env = "production"
+  # 列表排序依据：lastmod（最后修改时间，取自 git）/ date（发布日期）
+  listSortBy = "lastmod"
   description = "风来的个人博客 — 记录学习与研究"
   author = "风来"
   keywords = ["blog", "zssite"]
