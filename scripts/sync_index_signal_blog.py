@@ -288,10 +288,7 @@ def build_body(closes: dict[str, list[tuple[str, float]]], now: datetime) -> str
     lines.append("")
     lines.append("## 二、沪深300：上不上场")
     lines.append("")
-    lines.append("```")
-    lines.append("收盘价 > EMA200  且  EMA200 近 20 个交易日往上走  → 拿 30%")
-    lines.append("其余情况                                        → 清空 0%")
-    lines.append("```")
+    lines.append("条件是收盘价站上 EMA200、且 EMA200 近 20 个交易日在往上走，两条都成立才拿 30%。")
     lines.append("")
     lines.append("| 项目 | 数值 |")
     lines.append("|:---|--:|")
@@ -299,21 +296,15 @@ def build_body(closes: dict[str, list[tuple[str, float]]], now: datetime) -> str
     lines.append(f"| EMA200 | {hs['ema']:.2f} |")
     lines.append(f"| 距均线 | {pct(hs['gap'])} |")
     lines.append(
-        f"| EMA200 二十日斜率 | {hs['slope']:+.2f}（{hs['slope_date']} → {hs['date']}） |"
+        f"| 二十日斜率 | {hs['slope']:+.2f}（{hs['slope_date']} → {hs['date']}） |"
     )
-    lines.append(f"| 条件一：站上均线 | {'✅ 成立' if hs['above'] else '❌ 不成立'} |")
-    lines.append(f"| 条件二：斜率向上 | {'✅ 成立' if hs['slope'] > 0 else '❌ 不成立'} |")
+    lines.append(f"| 站上均线 | {'✅ 成立' if hs['above'] else '❌ 不成立'} |")
+    lines.append(f"| 斜率向上 | {'✅ 成立' if hs['slope'] > 0 else '❌ 不成立'} |")
     lines.append(f"| **结论** | **{hs_verdict}** |")
     lines.append("")
     lines.append("## 三、红利低波：偏离比在哪一档")
     lines.append("")
-    lines.append("```")
-    lines.append("偏离比 = 红利低波收盘 ÷ 它的 EMA169")
-    lines.append("")
-    lines.append("偏离比 < 1.10        → 满仓")
-    lines.append("偏离比 1.10 ~ 1.12   → 减掉一半")
-    lines.append("偏离比 ≥ 1.12        → 全部卖掉，钱进现金")
-    lines.append("```")
+    lines.append("偏离比是收盘价 ÷ EMA169：低于 1.10 满仓，1.10~1.12 减半，1.12 以上清空。")
     lines.append("")
     lines.append("| 项目 | 数值 |")
     lines.append("|:---|--:|")
@@ -322,9 +313,7 @@ def build_body(closes: dict[str, list[tuple[str, float]]], now: datetime) -> str
     lines.append(f"| 偏离比 | **{red['ratio']:.4f}** |")
     lines.append(f"| 2016 年以来均值 / 标准差 | {red['mean']:.4f} / {red['std']:.4f} |")
     lines.append(f"| 距均值 | {red['z']:+.2f} 个标准差 |")
-    lines.append(f"| 当前档位 | **{red['level']}**（{red['signal']}） |")
-    lines.append("")
-    lines.append("### 五道阈值还有多远")
+    lines.append(f"| **当前档位** | **{red['level']}**（{red['signal']}） |")
     lines.append("")
     lines.append("| 动作 | 阈值 | 距当前 |")
     lines.append("|:---|--:|--:|")
@@ -344,75 +333,49 @@ def build_body(closes: dict[str, list[tuple[str, float]]], now: datetime) -> str
     lines.append(f"| 红利低波 | {red_weight * 100:.0f}% | 偏离比 {red['ratio']:.4f} → {red['level']} |")
     lines.append(
         f"| 沪深300 | {hs_weight * 100:.0f}% | "
-        f"{'收盘在 EMA200 上方且斜率向上' if hs['hold'] else '未同时满足「站上均线 + 斜率向上」'} |"
+        f"{'站上均线且斜率向上' if hs['hold'] else '未同时满足两条条件'} |"
     )
-    lines.append(f"| 红利个股 | {STOCK_WEIGHT * 100:.0f}% | 自留地，单只不超过 5%，规则外不动 |")
-    lines.append(f"| 现金 | {cash_weight * 100:.0f}% | 减仓与未建仓的钱都放这里 |")
-    lines.append("")
-    lines.append("```")
-    lines.append(f"红利低波   {red_weight * 100:.0f}%")
-    lines.append(f"沪深300    {hs_weight * 100:.0f}%")
-    lines.append(f"红利个股   {STOCK_WEIGHT * 100:.0f}%")
-    lines.append(f"现金       {cash_weight * 100:.0f}%")
-    lines.append("```")
+    lines.append(f"| 红利个股 | {STOCK_WEIGHT * 100:.0f}% | 自留地，单只不超过 5% |")
+    lines.append(f"| 现金 | {cash_weight * 100:.0f}% | 减仓与未建仓的钱 |")
     lines.append("")
     if red_weight == 0.0:
         lines.append(
-            f"> 红利低波已触发清空：{RED_BASE_WEIGHT * 100:.0f}% 的底仓全部转现金，"
-            f"现金升到 {cash_weight * 100:.0f}%。下一轮只看偏离比什么时候跌破 1.00 再分三批建仓。"
+            f"> 红利低波已清空：{RED_BASE_WEIGHT * 100:.0f}% 底仓转现金，现金升到 {cash_weight * 100:.0f}%。"
+            "下一轮等偏离比跌破 1.00 再分三批建仓。"
         )
     elif red["weight"] == 0.5:
         lines.append(
-            f"> 红利低波已触发减半：{RED_BASE_WEIGHT * 100:.0f}% 的一半（{(RED_BASE_WEIGHT - hs_weight) * 50:.0f} 个百分点）转现金。"
+            f"> 红利低波已减半：{(RED_BASE_WEIGHT - hs_weight) * 50:.0f} 个百分点转现金。"
+        )
+    elif red["ratio"] < 1.00:
+        triggered = [name for name, _th, hit in entry_gate(red["ratio"]) if hit]
+        lines.append(
+            f"> 处于建仓期：已到位「{'、'.join(triggered)}」，没投的部分放债基里等。"
         )
     else:
         lines.append(
-            f"> 红利低波满仓、沪深300 {hs_verdict}：信号层面今天不需要任何动作，"
-            "连账户都不用点开。"
+            f"> 红利低波满仓、沪深300 {hs_verdict}，今天不需要任何动作。"
         )
     lines.append("")
-    if red["ratio"] < 1.00:
-        triggered = [name for name, _th, hit in entry_gate(red["ratio"]) if hit]
-        lines.append("### 建仓期提示")
-        lines.append("")
-        lines.append(
-            f"偏离比 {red['ratio']:.4f} 已跌破 1.00，处于建仓期："
-            f"已到位的批次是「{'、'.join(triggered)}」，还没投的部分继续放债基里等。"
-            "超过 18 个月没投完的，剩下的按当时价一次投完。"
-        )
-        lines.append("")
-    lines.append("## 五、口径与数据")
+    lines.append("## 五、口径")
     lines.append("")
-    lines.append(
-        "| 用途 | 代码 | 表 | 起点 | 口径说明 |"
-    )
+    lines.append("| 用途 | 代码 | 表 | 起点 | 说明 |")
     lines.append("|:---|:---|:---|:---:|:---|")
     lines.append(
-        f"| 沪深300 信号 | {HS300} | index_daily | {closes[HS300][0][0]} | 交易所价格指数，不复权 |"
+        f"| 沪深300 | {HS300} | index_daily | {closes[HS300][0][0]} | 价格指数，不复权 |"
     )
     lines.append(
-        f"| 红利低波信号 | {RED_MAIN} | csindex_daily | {closes[RED_MAIN][0][0]} | "
-        "中证红利低波动全收益指数，含分红再投资 |"
+        f"| 红利低波 | {RED_MAIN} | csindex_daily | {closes[RED_MAIN][0][0]} | 全收益，含分红再投资 |"
     )
     lines.append("")
     lines.append(
-        f"**红利低波用全收益口径 {RED_MAIN}**：把分红再投资算进去，跟策略 9 原文一致。"
-        "分红除权会把价格抹掉一截，用不复权的价格序列算偏离比会系统性偏低，所以这里不能用任何"
-        "价格序列或 ETF 实盘价代替。"
+        "红利低波必须用全收益序列：分红除权会把价格抹掉一截，换成价格指数或 ETF 实盘价，"
+        "偏离比会系统性偏低。"
     )
-    lines.append("")
-    lines.append("## 六、规则速查")
-    lines.append("")
-    lines.append("| 看什么 | 怎么算 | 看什么结果 |")
-    lines.append("|:---|:---|:---|")
-    lines.append("| 沪深300 收盘 / EMA200 | 除法减一 | 正数 = 在上方 |")
-    lines.append("| EMA200 二十日斜率 | 今天减二十天前 | 正数 = 在往上走 |")
-    lines.append("| 红利低波偏离比 | 收盘 ÷ EMA169 | 减仓看 1.10 / 1.12，建仓看 1.00 / 0.98 / 0.96 |")
-    lines.append("| 当前实际仓位 | 各标的市值 ÷ 总市值 | 和目标差多少 |")
     lines.append("")
     lines.append(
         "本文由 `scripts/sync_index_signal_blog.py` 按《投资策略 9 场内配置》的公式自动生成，"
-        "不含回测、不含对未来收益的估计。信号仅供参考，不构成投资建议。"
+        "不含回测。信号仅供参考，不构成投资建议。"
     )
     lines.append("")
     body = "\n".join(lines)
