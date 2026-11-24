@@ -261,20 +261,28 @@ def build_body(closes: dict[str, list[tuple[str, float]]], now: datetime) -> str
         red_weight = 0.0
     cash_weight = max(0.0, 1.0 - red_weight - hs_weight - STOCK_WEIGHT)
 
-    # 数据是否对齐 / 是否过期
-    last_date = max(hs["date"], red["date"])
-    fresh_days = (now.date() - datetime.strptime(last_date, "%Y-%m-%d").date()).days
+    # 数据是否对齐 / 是否过期。**两条序列各自算滞后，不能取 max()**：
+    # 取较新的一条会把另一条的陈旧彻底盖掉（2026-11-24 就发生过一次——沪深300 到
+    # 11-23、红利低波停在 11-19 已 5 个自然日，而 max() 只算出 1 天，警告没挂出来，
+    # 读者看到「满仓 80%」却不知道它建立在 5 天前的收盘价上）。
+    # clamp 到 0：`now` 早于数据日（时钟回拨、跨时区跑）时不该冒出「滞后 -2 天」这种话
+    def _lag(d: str) -> int:
+        return max(0, (now.date() - datetime.strptime(d, "%Y-%m-%d").date()).days)
+
+    lag_hs = _lag(hs["date"])
+    lag_red = _lag(red["date"])
     warnings: list[str] = []
     if hs["date"] != red["date"]:
         warnings.append(
-            f"两条序列末日不一致：沪深300 到 {hs['date']}，红利低波到 {red['date']}，"
-            "以各自最新交易日为准。"
+            f"两条序列末日不一致：沪深300 到 {hs['date']}（滞后 {lag_hs} 天），"
+            f"红利低波到 {red['date']}（滞后 {lag_red} 天），以各自最新交易日为准。"
         )
-    if fresh_days > 4:
-        warnings.append(
-            f"最新数据停在 {last_date}，距今 {fresh_days} 天，"
-            "先确认 FenglaiData 的 `./fenglai update` 是否跑过再照此执行。"
-        )
+    for name, d, lag in (("沪深300", hs["date"], lag_hs), ("红利低波", red["date"], lag_red)):
+        if lag > 4:
+            warnings.append(
+                f"{name}的数据停在 {d}，距今 {lag} 天，对应的信号可能已失效，"
+                "先确认 FenglaiData 的 `./fenglai update` 是否跑过再照此执行。"
+            )
     warn_block = "".join(f"> ⚠️ {w}\n" for w in warnings)
     warn_block = f"{warn_block}\n" if warn_block else ""
 
