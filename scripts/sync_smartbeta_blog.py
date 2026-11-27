@@ -28,9 +28,9 @@
     python3 scripts/sync_smartbeta_blog.py --no-update # 跳过增量，用库里现有数据
     python3 scripts/sync_smartbeta_blog.py --dry-run   # 只打印，不落盘（也不跑增量）
 
-定时（cron，每交易日 18:00；与「指数信号 4 场内配置」同一套做法：
+定时（cron，每交易日 08:05；与「指数信号 4 场内配置」同一套做法：
 每篇文章各自一把 flock 锁，日志分开写）：
-    0 18 * * 1-5 cd /home/zs/Develop/zssite_online && \\
+    5 8 * * 1-5 cd /home/zs/Develop/zssite_online && \\
         /usr/bin/flock -n /tmp/smartbeta.lock /usr/bin/python3 \\
         scripts/sync_smartbeta_blog.py --push >> logs/smartbeta.log 2>&1
 
@@ -446,7 +446,7 @@ date: {date}
 draft: false
 tags: ["指数信号", "smartbeta", "调仓信号", "红利低波", "中证现金流"]
 categories: ["指数信号"]
-summary: "每交易日 18:00 由 cron 自动生成的 SmartBeta 策略信号日报：红利低波 EMA169 V5 与中证现金流 MA180 的当日偏离比、档位仓位建议及各道阈值的距离，数据取自 FenglaiData 本地库。"
+summary: "每交易日 08:05 由 cron 自动生成的 SmartBeta 策略信号日报：红利低波 EMA169 V5 与中证现金流 MA180 的当日偏离比、档位仓位建议及各道阈值的距离，数据取自 FenglaiData 本地库。"
 comments: true
 showToc: true
 cover:
@@ -454,7 +454,7 @@ cover:
   alt: ""
   caption: ""
 ---
-> 📡 自动同步: 每交易日 18:00 由 cron 触发 `scripts/sync_smartbeta_blog.py --push` 更新
+> 📡 自动同步: 每交易日 08:05 由 cron 触发 `scripts/sync_smartbeta_blog.py --push` 更新
 > 数据来源: FenglaiData 本地只读库（生成前先跑 `./fenglai update --datasets csindex_daily`）
 > 风险提示: 信号仅供参考，不构成投资建议。市场有风险，投资需谨慎。
 
