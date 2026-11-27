@@ -6,7 +6,7 @@
 
 只算当期信号，不做回测。两条策略，各一只标的：
 
-  红利低波 EMA169 V5 —— H20269（中证红利低波全收益）
+  红利低波 EMA169 —— H20269（中证红利低波全收益）
       偏离比 = 收盘 ÷ EMA169
       ratio ≤ 1.00        → 加仓 120%
       1.00 ~ 1.10         → 满仓 100%
@@ -350,12 +350,12 @@ def build_body(series: dict[str, list[tuple[str, float]]], now: datetime) -> str
         lines.append("")
 
     # 二、红利低波
-    lines.append("## 二、红利低波（EMA169 V5）")
+    lines.append("## 二、红利低波（EMA169）")
     lines.append("")
     lines.append(
         f"偏离比是收盘 ÷ EMA169：≤ {RED_ADD_MAX:.2f} 加仓 {RED_ADD_WEIGHT * 100:.0f}%，"
-        f"{RED_ADD_MAX:.2f}~{RED_FULL_MAX:.2f} 满仓，"
-        f"{RED_FULL_MAX:.2f}~{RED_HALF_MAX:.2f} 半仓，≥ {RED_HALF_MAX:.2f} 空仓。"
+        f"{RED_ADD_MAX:.2f}～{RED_FULL_MAX:.2f} 满仓，"
+        f"{RED_FULL_MAX:.2f}～{RED_HALF_MAX:.2f} 半仓，≥ {RED_HALF_MAX:.2f} 空仓。"
     )
     lines.append("")
     lines.append("| 项目 | 数值 |")
@@ -381,7 +381,7 @@ def build_body(series: dict[str, list[tuple[str, float]]], now: datetime) -> str
     lines.append("")
     lines.append(
         f"偏离比是收盘 ÷ MA{CF_MA_SPAN}：≤ {CF_ADD_MAX:.2f} 加仓 "
-        f"{CF_ADD_WEIGHT * 100:.0f}%，{CF_ADD_MAX:.2f}~{CF_EMPTY_MIN:.2f} 满仓，"
+        f"{CF_ADD_WEIGHT * 100:.0f}%，{CF_ADD_MAX:.2f}～{CF_EMPTY_MIN:.2f} 满仓，"
         f"≥ {CF_EMPTY_MIN:.2f} 空仓。"
     )
     lines.append("")
@@ -446,7 +446,7 @@ date: {date}
 draft: false
 tags: ["指数信号", "smartbeta", "调仓信号", "红利低波", "中证现金流"]
 categories: ["指数信号"]
-summary: "每交易日 08:05 由 cron 自动生成的 SmartBeta 策略信号日报：红利低波 EMA169 V5 与中证现金流 MA180 的当日偏离比、档位仓位建议及各道阈值的距离，数据取自 FenglaiData 本地库。"
+summary: "每交易日 08:05 由 cron 自动生成的 SmartBeta 策略信号日报：红利低波 EMA169 与中证现金流 MA180 的当日偏离比、档位仓位建议及各道阈值的距离，数据取自 FenglaiData 本地库。"
 comments: true
 showToc: true
 cover:
@@ -464,9 +464,28 @@ cover:
 
 
 def render(series, now: datetime) -> str:
-    return FRONT_MATTER.format(date=now.strftime("%Y-%m-%dT%H:%M:%S+08:00")) + build_body(
+    doc = FRONT_MATTER.format(date=now.strftime("%Y-%m-%dT%H:%M:%S+08:00")) + build_body(
         series, now
     )
+    _check_no_strikethrough(doc)
+    return doc
+
+
+def _check_no_strikethrough(doc: str) -> None:
+    """挡住 Markdown 把区间号当删除线配对渲染的坑。
+
+    Goldmark 默认开 `strikethrough`：同一行里出现两个半角 `~` 就会被配对成
+    `<del>...</del>`。所以写区间（如「1.00～1.10 满仓，1.10～1.12 半仓」）必须用
+    全角波浪号。这里逐行数半角 `~`，满 2 个就报错 —— 宁可误报（比如真有 `~~`
+    想表达删除线），也不要让区间号静默变成删除线。
+    """
+    for lineno, line in enumerate(doc.splitlines(), 1):
+        if line.count("~") >= 2:
+            raise SystemExit(
+                f"第 {lineno} 行有 {line.count('~')} 个半角「~」，"
+                f"Markdown 会把它们配成删除线：{line.strip()[:80]}\n"
+                "区间请用全角「～」。"
+            )
 
 
 def strip_stamp(text: str) -> str:
